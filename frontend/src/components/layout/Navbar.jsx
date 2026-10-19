@@ -171,7 +171,7 @@ export default function Navbar() {
               ) : isWrongNetwork ? (
                 <><AlertTriangle size={13} /> Wrong Network</>
               ) : isConnected ? (
-                <>{shortAddress()} <ChevronDown size={12} /></>
+                <>{typeof shortAddress === 'function' ? shortAddress() : (address ? `${address.slice(0, 6)}…${address.slice(-4)}` : '')} <ChevronDown size={12} /></>
               ) : (
                 'Connect Wallet'
               )}

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import Navbar from '@components/layout/Navbar'
@@ -83,14 +83,72 @@ function AppShell() {
   )
 }
 
+class RootErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = { hasError: false, error: null }
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error }
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error('[Parley] App error intercepted:', error, errorInfo)
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          minHeight: '100vh',
+          background: '#050714',
+          color: '#F8FAFC',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 24,
+          textAlign: 'center',
+          fontFamily: 'Inter, sans-serif',
+        }}>
+          <div style={{ fontSize: 64, marginBottom: 16 }}>⚖️</div>
+          <h1 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 26, margin: '0 0 12px', color: '#00F5FF' }}>
+            Parley Escrow
+          </h1>
+          <p style={{ color: '#94A3B8', maxWidth: 460, margin: '0 0 24px', lineHeight: 1.6 }}>
+            An unexpected error occurred. Click below to refresh and load cleanly.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              padding: '12px 28px',
+              borderRadius: 12,
+              background: 'linear-gradient(135deg, #00F5FF, #8B5CF6)',
+              border: 'none',
+              color: '#050714',
+              fontWeight: 800,
+              cursor: 'pointer',
+              fontSize: 15,
+            }}
+          >
+            Refresh App
+          </button>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
 export default function App() {
   const { initTheme } = useThemeStore()
   useEffect(() => { initTheme() }, [])
 
   return (
-    <BrowserRouter>
-      <ScrollToTop />
-      <AppShell />
-    </BrowserRouter>
+    <RootErrorBoundary>
+      <BrowserRouter>
+        <ScrollToTop />
+        <AppShell />
+      </BrowserRouter>
+    </RootErrorBoundary>
   )
 }
+

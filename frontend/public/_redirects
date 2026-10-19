@@ -1,1 +1,2 @@
-/* /index.html 200
+# Cloudflare Pages SPA Routing
+# Cloudflare Pages automatically serves /index.html for any paths that do not match static assets.

@@ -16,8 +16,7 @@ function StatItem({ label, value, prefix = '', suffix = '', color = 'var(--accen
   const ref = useScrollReveal()
   const count = useAnimatedCounter(value)
   return (
-    <div ref={ref} style={{ textAlign: 'center', opacity: 0, transition: 'opacity 0.6s ease' }}
-      className="reveal-target">
+    <div ref={ref} style={{ textAlign: 'center' }} className="reveal-target">
       <div style={{ fontSize: 40, fontWeight: 900, fontFamily: 'Orbitron, sans-serif', color, lineHeight: 1 }}>
         {prefix}{count}{suffix}
       </div>

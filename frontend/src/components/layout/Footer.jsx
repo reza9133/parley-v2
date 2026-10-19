@@ -15,13 +15,13 @@ const footerLinks = {
   Resources: [
     { label: 'Documentation', to: '/docs' },
     { label: 'How It Works', to: '/docs#how-it-works' },
-    { label: 'Contract Source', href: 'https://github.com/parley/parley/blob/main/contracts/parley.py' },
-    { label: 'E2E Test Report', href: '#', label2: 'View Report' },
+    { label: 'Contract Source', href: 'https://github.com/reza9133/parley/blob/main/contracts/parley.py' },
+    { label: 'E2E Test Report', href: 'https://github.com/reza9133/parley/blob/main/reports/parley-e2e-2026-10-18T14-58-23.md', label2: 'View Report' },
   ],
   Network: [
     { label: 'GenLayer', href: 'https://genlayer.com' },
     { label: 'Studionet Explorer', href: 'https://studio.genlayer.com' },
-    { label: `Contract: ${CONTRACT.slice(0, 10)}...`, href: `https://studio.genlayer.com/address/${CONTRACT}` },
+    { label: `Contract: ${CONTRACT.slice(0, 10)}...`, href: `https://explorer-studio.genlayer.com/address/${CONTRACT}` },
   ],
 }
 
@@ -53,11 +53,11 @@ export default function Footer() {
             </p>
 
             <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
-              <a href="https://github.com/parley" target="_blank" rel="noopener noreferrer"
+              <a href="https://github.com/reza9133/parley" target="_blank" rel="noopener noreferrer"
                 className="btn-ghost" style={{ padding: '8px', borderRadius: 8, border: '1px solid var(--border-primary)' }}>
                 <Github size={16} />
               </a>
-              <a href="https://twitter.com/parley_genlayer" target="_blank" rel="noopener noreferrer"
+              <a href="https://x.com/amirhp771" target="_blank" rel="noopener noreferrer"
                 className="btn-ghost" style={{ padding: '8px', borderRadius: 8, border: '1px solid var(--border-primary)' }}>
                 <Twitter size={16} />
               </a>

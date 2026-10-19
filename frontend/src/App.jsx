@@ -1,8 +1,14 @@
-import React, { useEffect } from 'react'
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { useEffect, useState, Suspense } from 'react'
+import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
+import useThemeStore from '@store/useThemeStore'
+import useWalletStore from '@store/useWalletStore'
+import useDealsStore from '@store/useDealsStore'
 import Navbar from '@components/layout/Navbar'
 import Footer from '@components/layout/Footer'
+import { ParleySpinner } from '@components/spinners/Spinners'
+import ErrorBoundary from '@components/ui/ErrorBoundary'
+import ParleyLogo from '@components/ui/ParleyLogo'
 import Landing from '@pages/Landing'
 import Dashboard from '@pages/Dashboard'
 import Deals from '@pages/Deals'
@@ -10,145 +16,111 @@ import DealDetail from '@pages/DealDetail'
 import CreateDeal from '@pages/CreateDeal'
 import MyDeals from '@pages/MyDeals'
 import Profile from '@pages/Profile'
-import Docs from '@pages/Docs'
 import Court from '@pages/Court'
-import useThemeStore from '@store/useThemeStore'
+import Docs from '@pages/Docs'
 
-const pageVariants = {
-  initial: { opacity: 0, y: 12 },
-  in: { opacity: 1, y: 0 },
-  out: { opacity: 0, y: -12 },
-}
-const pageTransition = { duration: 0.28, ease: [0.22, 1, 0.36, 1] }
-
-function AnimatedRoutes() {
-  const location = useLocation()
-  return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={location.pathname}
-        initial="initial"
-        animate="in"
-        exit="out"
-        variants={pageVariants}
-        transition={pageTransition}
-      >
-        <Routes location={location}>
-          <Route path="/" element={<Landing />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/deals" element={<Deals />} />
-          <Route path="/deals/:id" element={<DealDetail />} />
-          <Route path="/create" element={<CreateDeal />} />
-          <Route path="/my-deals" element={<MyDeals />} />
-          <Route path="/profile/:address" element={<Profile />} />
-          <Route path="/docs" element={<Docs />} />
-          <Route path="/court" element={<Court />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </motion.div>
-    </AnimatePresence>
-  )
+function ScrollManager() {
+  const { pathname, hash } = useLocation()
+  useEffect(() => {
+    if (hash) {
+      const t = setTimeout(() => {
+        document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: 'smooth' })
+      }, 120)
+      return () => clearTimeout(t)
+    }
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [pathname, hash])
+  return null
 }
 
 function NotFound() {
   return (
-    <div style={{
-      minHeight: '100vh', display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center', paddingTop: 80,
-    }}>
-      <div style={{ fontSize: 80, marginBottom: 16 }}>⚖️</div>
-      <h1 className="gradient-text" style={{ fontFamily: 'Orbitron, sans-serif', margin: '0 0 12px' }}>404</h1>
-      <p style={{ color: 'var(--text-secondary)', marginBottom: 24 }}>This page doesn't exist on Studionet.</p>
-      <a href="/" className="btn-primary">Back to Home</a>
+    <div style={{ minHeight: '70vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 20, textAlign: 'center', padding: 24 }}>
+      <img src="/mochi/mochi-thinking.png" alt="Mochi thinking" style={{ height: 260, objectFit: 'contain' }} />
+      <h1 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 40, color: 'var(--text-primary)' }}>404</h1>
+      <p style={{ color: 'var(--text-secondary)', maxWidth: 380 }}>Mochi searched the whole court and could not find this page.</p>
+      <Link to="/" className="btn-primary">Back to Parley</Link>
     </div>
   )
 }
 
-function ScrollToTop() {
-  const { pathname } = useLocation()
-  useEffect(() => { window.scrollTo(0, 0) }, [pathname])
-  return null
-}
-
-function AppShell() {
-  const isLanding = useLocation().pathname === '/'
+function Splash({ onDone }) {
+  useEffect(() => {
+    const t = setTimeout(onDone, 1400)
+    return () => clearTimeout(t)
+  }, [onDone])
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Navbar />
-      <main style={{ flex: 1 }}>
-        <AnimatedRoutes />
-      </main>
-      {!isLanding && <Footer />}
-    </div>
+    <motion.div
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0, scale: 1.04 }}
+      transition={{ duration: 0.5 }}
+      style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'var(--bg-primary, #050714)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 28 }}
+    >
+      <ParleyLogo size={72} showText />
+      <ParleySpinner size={48} />
+    </motion.div>
   )
 }
 
-class RootErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = { hasError: false, error: null }
-  }
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error }
-  }
-  componentDidCatch(error, errorInfo) {
-    console.error('[Parley] App error intercepted:', error, errorInfo)
-  }
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div style={{
-          minHeight: '100vh',
-          background: '#050714',
-          color: '#F8FAFC',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: 24,
-          textAlign: 'center',
-          fontFamily: 'Inter, sans-serif',
-        }}>
-          <div style={{ fontSize: 64, marginBottom: 16 }}>⚖️</div>
-          <h1 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 26, margin: '0 0 12px', color: '#00F5FF' }}>
-            Parley Escrow
-          </h1>
-          <p style={{ color: '#94A3B8', maxWidth: 460, margin: '0 0 24px', lineHeight: 1.6 }}>
-            An unexpected error occurred. Click below to refresh and load cleanly.
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            style={{
-              padding: '12px 28px',
-              borderRadius: 12,
-              background: 'linear-gradient(135deg, #00F5FF, #8B5CF6)',
-              border: 'none',
-              color: '#050714',
-              fontWeight: 800,
-              cursor: 'pointer',
-              fontSize: 15,
-            }}
+function Shell() {
+  const location = useLocation()
+  return (
+    <>
+      <ScrollManager />
+      <Navbar />
+      <main style={{ minHeight: '100vh', paddingTop: 72 }}>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
           >
-            Refresh App
-          </button>
-        </div>
-      )
-    }
-    return this.props.children
-  }
+            <Suspense fallback={<div style={{ display: 'grid', placeItems: 'center', height: '60vh' }}><ParleySpinner size={56} /></div>}>
+              <ErrorBoundary fallback={<div style={{ padding: 48, textAlign: 'center', color: 'var(--text-secondary)' }}>Something went wrong loading this page. Please refresh.</div>}>
+              <Routes location={location}>
+                <Route path="/" element={<Landing />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/deals" element={<Deals />} />
+                <Route path="/deals/:id" element={<DealDetail />} />
+                <Route path="/create" element={<CreateDeal />} />
+                <Route path="/my-deals" element={<MyDeals />} />
+                <Route path="/profile/:address" element={<Profile />} />
+                <Route path="/court" element={<Court />} />
+                <Route path="/docs" element={<Docs />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              </ErrorBoundary>
+            </Suspense>
+          </motion.div>
+        </AnimatePresence>
+      </main>
+      <Footer />
+    </>
+  )
 }
 
 export default function App() {
-  const { initTheme } = useThemeStore()
-  useEffect(() => { initTheme() }, [])
-
+  const initTheme = useThemeStore((s) => s.initTheme)
+  const [splash, setSplash] = useState(() => {
+    try { return !sessionStorage.getItem('parley-splash') } catch { return true }
+  })
+  useEffect(() => {
+    initTheme()
+    useWalletStore.getState().init()
+    useDealsStore.getState().refreshDeals()
+    const t = setInterval(() => useDealsStore.getState().refreshDeals(), 60000)
+    return () => clearInterval(t)
+  }, [initTheme])
+  const done = () => {
+    try { sessionStorage.setItem('parley-splash', '1') } catch {}
+    setSplash(false)
+  }
   return (
-    <RootErrorBoundary>
-      <BrowserRouter>
-        <ScrollToTop />
-        <AppShell />
-      </BrowserRouter>
-    </RootErrorBoundary>
+    <BrowserRouter>
+      <AnimatePresence>{splash && <Splash key="splash" onDone={done} />}</AnimatePresence>
+      <Shell />
+    </BrowserRouter>
   )
 }
-

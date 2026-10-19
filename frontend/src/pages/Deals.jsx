@@ -12,7 +12,7 @@ const filterOptions = [
 ]
 
 export default function Deals() {
-  const { deals, filter, search, setFilter, setSearch, filteredDeals, isLoading, refreshDeals, source } = useDealsStore()
+  const { deals, filter, search, setFilter, setSearch, filteredDeals, isLoading, refreshDeals } = useDealsStore()
   const [showFilters, setShowFilters] = useState(false)
   const [sort, setSort] = useState('newest')
 
@@ -29,28 +29,13 @@ export default function Deals() {
     <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', paddingTop: 80 }}>
       <div className="container" style={{ padding: '40px 24px' }}>
 
-        {/* Mock data warning banner */}
-        {source === 'mock' && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.4)', borderRadius: 12, padding: '12px 18px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 10, color: '#F59E0B', fontSize: 14 }}
-          >
-            <span style={{ fontSize: 18 }}>⚠</span>
-            <span><strong>Demo data</strong> — Connect your wallet to Studionet to see live deals from the chain.</span>
-            <button onClick={refreshDeals} style={{ marginLeft: 'auto', background: 'rgba(245,158,11,0.2)', border: '1px solid rgba(245,158,11,0.4)', borderRadius: 8, padding: '4px 12px', color: '#F59E0B', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>
-              Retry
-            </button>
-          </motion.div>
-        )}
-
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 32 }}>
           <h1 style={{ margin: '0 0 8px', fontSize: 32, fontWeight: 800, fontFamily: 'Orbitron, sans-serif' }}>
             <span className="gradient-text">Explore</span> Deals
           </h1>
           <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 15 }}>
-            {source === 'chain' ? '🟢 Live from Studionet · ' : ''}{deals.length} deals · {results.length} matching
+            {deals.length} deals on Studionet · {results.length} matching
           </p>
         </motion.div>
 

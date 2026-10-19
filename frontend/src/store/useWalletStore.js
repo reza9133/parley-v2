@@ -1,139 +1,89 @@
 import { create } from 'zustand'
-import { ethers } from 'ethers'
-import {
-  switchToStudionet,
-  fetchBalance,
-} from '@data/parleyService'
-import { STUDIONET_CHAIN_ID } from '@data/contract'
+import { LIVE, CHAIN, RPC, formatGen } from '@/lib/chain'
 
-/**
- * Wallet Store — real MetaMask connection to GenLayer Studionet.
- *
- * States:
- *  isConnected  — wallet is connected AND on the right network
- *  isConnecting — connection in progress
- *  isWrongNetwork — wallet connected but on wrong chain
- */
+const hexId = () => '0x' + Number(CHAIN.id).toString(16)
+
+async function ensureChain(eth) {
+  try {
+    await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: hexId() }] })
+  } catch (e) {
+    if (e?.code === 4902 || /unrecognized|not added/i.test(String(e?.message))) {
+      await eth.request({
+        method: 'wallet_addEthereumChain',
+        params: [{
+          chainId: hexId(),
+          chainName: CHAIN.name || 'GenLayer Studionet',
+          nativeCurrency: CHAIN.nativeCurrency || { name: 'GEN', symbol: 'GEN', decimals: 18 },
+          rpcUrls: [RPC],
+        }],
+      })
+    } else throw e
+  }
+}
+
+async function readBalance(address) {
+  try {
+    const res = await fetch(RPC, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_getBalance', params: [address, 'latest'] }),
+    })
+    const j = await res.json()
+    return formatGen(BigInt(j.result), 4)
+  } catch {
+    return null
+  }
+}
+
 const useWalletStore = create((set, get) => ({
   address: null,
   isConnected: false,
   isConnecting: false,
-  isWrongNetwork: false,
+  network: 'studionet',
   balance: null,
   error: null,
 
-  // ─── Connect ──────────────────────────────────────────────────────────────
-  connect: async () => {
-    set({ isConnecting: true, error: null })
-    try {
-      if (!window.ethereum) {
-        throw new Error('MetaMask (or compatible wallet) not found. Please install it to use Parley.')
-      }
-
-      // Request accounts
-      const browserProvider = new ethers.BrowserProvider(window.ethereum)
-      await browserProvider.send('eth_requestAccounts', [])
-      const signer = await browserProvider.getSigner()
-      const address = await signer.getAddress()
-
-      // Switch / add Studionet
-      await switchToStudionet()
-
-      // Fetch native GEN balance
-      const balance = await fetchBalance(address)
-
-      set({
-        address,
-        isConnected: true,
-        isConnecting: false,
-        isWrongNetwork: false,
-        balance,
-        error: null,
-      })
-
-      // Listen for account/chain changes
-      get()._attachListeners()
-    } catch (err) {
-      set({
-        isConnecting: false,
-        error: err.message ?? 'Connection failed',
-      })
-    }
+  apply: async (address) => {
+    if (!address) return set({ address: null, isConnected: false, balance: null })
+    set({ address, isConnected: true, isConnecting: false, error: null, balance: await readBalance(address) })
   },
 
-  // ─── Disconnect ───────────────────────────────────────────────────────────
-  disconnect: () => {
-    get()._removeListeners()
-    set({ address: null, isConnected: false, balance: null, isWrongNetwork: false, error: null })
-  },
-
-  // ─── Refresh balance ──────────────────────────────────────────────────────
-  refreshBalance: async () => {
-    const { address } = get()
-    if (!address) return
-    try {
-      const balance = await fetchBalance(address)
-      set({ balance })
-    } catch {/* silent */}
-  },
-
-  // ─── Formatted short address ─────────────────────────────────────────────
-  shortAddress: () => {
-    const { address } = get()
-    if (!address) return null
-    return `${address.slice(0, 6)}…${address.slice(-4)}`
-  },
-
-  // ─── Internal: event listeners ───────────────────────────────────────────
-  _handleAccountsChanged: (accounts) => {
-    if (!accounts || accounts.length === 0) {
-      get().disconnect()
-    } else {
-      set({ address: accounts[0] })
-      get().refreshBalance()
-    }
-  },
-
-  _handleChainChanged: (chainId) => {
-    const id = parseInt(chainId, 16)
-    if (id !== STUDIONET_CHAIN_ID) {
-      set({ isWrongNetwork: true, isConnected: false })
-    } else {
-      set({ isWrongNetwork: false, isConnected: true })
-      get().refreshBalance()
-    }
-  },
-
-  _attachListeners: () => {
-    if (!window.ethereum) return
-    window.ethereum.on('accountsChanged', get()._handleAccountsChanged)
-    window.ethereum.on('chainChanged', get()._handleChainChanged)
-  },
-
-  _removeListeners: () => {
-    if (!window.ethereum) return
-    window.ethereum.removeListener('accountsChanged', get()._handleAccountsChanged)
-    window.ethereum.removeListener('chainChanged', get()._handleChainChanged)
-  },
-
-  // ─── Auto-reconnect on page load ─────────────────────────────────────────
-  autoConnect: async () => {
-    if (!window.ethereum) return
+  // Re-attach silently if the wallet is already authorised for this site.
+  init: async () => {
+    if (!LIVE || !window.ethereum) return
     try {
       const accounts = await window.ethereum.request({ method: 'eth_accounts' })
-      if (accounts && accounts.length > 0) {
-        const chainId = await window.ethereum.request({ method: 'eth_chainId' })
-        const id = parseInt(chainId, 16)
-        const balance = await fetchBalance(accounts[0])
-        set({
-          address: accounts[0],
-          isConnected: id === STUDIONET_CHAIN_ID,
-          isWrongNetwork: id !== STUDIONET_CHAIN_ID,
-          balance,
-        })
-        get()._attachListeners()
-      }
-    } catch {/* silent */}
+      if (accounts?.[0]) await get().apply(accounts[0])
+      window.ethereum.on?.('accountsChanged', (a) => get().apply(a?.[0] || null))
+    } catch { /* ignore */ }
+  },
+
+  connect: async () => {
+    set({ isConnecting: true, error: null })
+    if (!LIVE) {
+      // Demo mode: no contract configured, so use a throwaway address.
+      await new Promise((r) => setTimeout(r, 800))
+      const mock = '0x' + Array.from({ length: 40 }, () => Math.floor(Math.random() * 16).toString(16)).join('')
+      return set({ address: mock, isConnected: true, isConnecting: false, balance: (Math.random() * 5 + 0.5).toFixed(4) })
+    }
+    if (!window.ethereum) {
+      return set({ isConnecting: false, error: 'No wallet found. Install MetaMask to connect.' })
+    }
+    try {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      await ensureChain(window.ethereum)
+      await get().apply(accounts[0])
+      window.ethereum.on?.('accountsChanged', (a) => get().apply(a?.[0] || null))
+    } catch (e) {
+      set({ isConnecting: false, error: e?.code === 4001 ? 'Connection request was rejected.' : String(e?.message || e) })
+    }
+  },
+
+  disconnect: () => set({ address: null, isConnected: false, balance: null }),
+
+  shortAddress: () => {
+    const { address } = get()
+    return address ? `${address.slice(0, 6)}...${address.slice(-4)}` : null
   },
 }))
 

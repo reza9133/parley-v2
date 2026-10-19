@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion'
 import { Gavel, Scale, Brain, Clock, ExternalLink, CheckCircle, Star, XCircle, RefreshCw } from 'lucide-react'
-import { mockDeals, STATES } from '@data/mockData'
+import { STATES } from '@data/mockData'
+import useDealsStore from '@store/useDealsStore'
 import { Link } from 'react-router-dom'
 
-const disputedDeals = mockDeals.filter(d => [3, 4, 5].length && [3, 4, 5].includes(d.state))
 
 function RulingCard({ deal }) {
   const state = STATES[deal.state]
@@ -76,6 +76,8 @@ function RulingCard({ deal }) {
 }
 
 export default function Court() {
+  const deals = useDealsStore(s => s.deals)
+  const disputedDeals = deals.filter(d => [3, 4, 5].includes(d.state))
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', paddingTop: 80 }}>
       <div className="container" style={{ padding: '40px 24px' }}>

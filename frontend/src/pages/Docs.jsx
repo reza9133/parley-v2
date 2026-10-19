@@ -151,11 +151,11 @@ export default function Docs() {
               Parley is an escrow for freelance-style work, written as a GenLayer intelligent contract for Studionet. A client locks the price and writes down acceptance criteria. A provider takes the job and posts a bond. The AI court reads the delivered page and scores it.
             </p>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 40 }}>
-              <a href={`https://studio.genlayer.com/address/${CONTRACT}`} target="_blank" rel="noopener noreferrer"
+              <a href={`https://explorer-studio.genlayer.com/address/${CONTRACT}`} target="_blank" rel="noopener noreferrer"
                 className="btn-secondary" style={{ fontSize: 13, padding: '8px 16px' }}>
                 <ExternalLink size={13} /> View Contract
               </a>
-              <a href="https://github.com/parley/parley" target="_blank" rel="noopener noreferrer"
+              <a href="https://github.com/reza9133/parley" target="_blank" rel="noopener noreferrer"
                 className="btn-secondary" style={{ fontSize: 13, padding: '8px 16px' }}>
                 <Code size={13} /> Source Code
               </a>

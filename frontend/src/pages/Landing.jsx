@@ -5,8 +5,10 @@ import { ArrowRight, Shield, Zap, Globe, Lock, Scale, Brain, Star, CheckCircle, 
 import { useAnimatedCounter } from '@hooks/useAnimatedCounter'
 import { useScrollReveal } from '@hooks/useScrollReveal'
 import MochiCanvas from '@components/3d/MochiCanvas'
+import ErrorBoundary from '@components/ui/ErrorBoundary'
+import MochiGallery from '@components/ui/MochiGallery'
 import DealCard from '@components/deals/DealCard'
-import { mockDeals, mockStats } from '@data/mockData'
+import useDealsStore from '@store/useDealsStore'
 import { ParleySpinner, MochiSpinner, HexSpinner, CourtSpinner, OrbitSpinner } from '@components/spinners/Spinners'
 
 // ============================================================
@@ -16,7 +18,8 @@ function StatItem({ label, value, prefix = '', suffix = '', color = 'var(--accen
   const ref = useScrollReveal()
   const count = useAnimatedCounter(value)
   return (
-    <div ref={ref} style={{ textAlign: 'center' }} className="reveal-target">
+    <div ref={ref} style={{ textAlign: 'center', opacity: 0, transition: 'opacity 0.6s ease' }}
+      className="reveal-target">
       <div style={{ fontSize: 40, fontWeight: 900, fontFamily: 'Orbitron, sans-serif', color, lineHeight: 1 }}>
         {prefix}{count}{suffix}
       </div>
@@ -135,7 +138,8 @@ export default function Landing() {
   const heroOpacity = useTransform(scrollY, [0, 400], [1, 0])
   const heroY = useTransform(scrollY, [0, 400], [0, -80])
 
-  const recentDeals = mockDeals.slice(0, 3)
+  const liveDeals = useDealsStore(s => s.deals)
+  const recentDeals = liveDeals.slice(0, 3)
 
   return (
     <div style={{ minHeight: '100vh', overflowX: 'hidden' }}>
@@ -290,7 +294,7 @@ export default function Landing() {
                 animation: 'float 6s ease-in-out infinite',
               }} />
 
-              <MochiCanvas size={420} />
+              <ErrorBoundary fallback={<img src="/mochi/mochi-welcome.png" alt="Mochi" style={{ width: 420, maxWidth: '100%' }} />}><MochiCanvas size={420} /></ErrorBoundary>
 
               {/* Floating labels */}
               <motion.div
@@ -590,6 +594,8 @@ export default function Landing() {
           </div>
         </motion.div>
       </section>
+
+      <MochiGallery />
 
       <style>{`
         @keyframes pulse {

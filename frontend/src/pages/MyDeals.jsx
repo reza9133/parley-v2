@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { User, Briefcase, Star, TrendingUp, Scale, Award } from 'lucide-react'
-import { mockDeals, STATES } from '@data/mockData'
+import { useParams } from 'react-router-dom'
+import { STATES } from '@data/mockData'
+import useDealsStore from '@store/useDealsStore'
+import { LIVE } from '@/lib/chain'
 import DealCard from '@components/deals/DealCard'
 import useWalletStore from '@store/useWalletStore'
 
@@ -29,13 +32,15 @@ export default function MyDeals() {
   const { isConnected, connect, address } = useWalletStore()
   const [tab, setTab] = useState('client')
 
-  const myAddr = address || MOCK_ADDR
-  const asClient = mockDeals.filter(d => d.client === myAddr || !address)
-  const asProvider = mockDeals.filter(d => d.provider === myAddr)
+  const params = useParams()
+  const allDeals = useDealsStore(s => s.deals)
+  const myAddr = (params.address || address || (LIVE ? '' : MOCK_ADDR)).toLowerCase()
+  const asClient = allDeals.filter(d => d.client?.toLowerCase() === myAddr || (!LIVE && !address))
+  const asProvider = allDeals.filter(d => d.provider?.toLowerCase() === myAddr)
   const active = asClient.filter(d => [0,1,2,3,4,5].includes(d.state))
   const closed = asClient.filter(d => [6,7,8].includes(d.state))
 
-  if (!isConnected) {
+  if (!isConnected && !params.address) {
     return (
       <div style={{ minHeight: '100vh', paddingTop: 80, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-card" style={{ padding: 48, maxWidth: 440, textAlign: 'center' }}>

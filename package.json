@@ -1,16 +1,32 @@
 {
-  "name": "parley-tools",
+  "name": "parley-frontend",
   "private": true,
+  "version": "1.0.0",
   "type": "module",
-  "description": "Deploy and live-test the Parley contract on Studionet",
   "scripts": {
-    "deploy": "node scripts/deploy.mjs",
-    "e2e": "node scripts/e2e.mjs",
-    "e2e:quick": "node scripts/e2e.mjs --only cancel,adversarial",
-    "e2e:plan": "node scripts/e2e.mjs --dry-run",
-    "check": "bash scripts/run-all.sh"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "genlayer-js": "1.1.8"
+    "@react-three/drei": "^9.109.2",
+    "@react-three/fiber": "^8.17.10",
+    "framer-motion": "^11.11.11",
+    "gsap": "^3.12.5",
+    "howler": "^2.2.4",
+    "lucide-react": "^0.462.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.27.0",
+    "recharts": "^2.13.3",
+    "three": "^0.169.0",
+    "zustand": "^5.0.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.3",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14",
+    "vite": "^5.4.10"
   }
 }

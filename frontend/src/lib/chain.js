@@ -3,6 +3,7 @@
 import { createClient } from 'genlayer-js'
 import { studionet } from 'genlayer-js/chains'
 import { outcome } from './receipt'
+import { getActiveProvider } from './eip6963'
 
 const DEPLOYED = '0x5d084E85056Acc332793f34667b8a9890f7B2Bd9' // the Studionet deployment; set VITE_PARLEY_ADDRESS to empty for demo mode
 export const CONTRACT = (import.meta.env.VITE_PARLEY_ADDRESS ?? DEPLOYED).trim()
@@ -38,7 +39,9 @@ function getReader() {
   return reader
 }
 function getWriter(account) {
-  return createClient({ chain: CHAIN, account, ...(RPC ? { endpoint: RPC } : {}) })
+  // Sign with the wallet picked in the connect modal (EIP-6963), not whichever extension grabbed window.ethereum.
+  const provider = getActiveProvider()
+  return createClient({ chain: CHAIN, account, ...(provider ? { provider } : {}), ...(RPC ? { endpoint: RPC } : {}) })
 }
 
 async function read(fn, args = []) {

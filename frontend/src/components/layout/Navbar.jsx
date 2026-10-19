@@ -3,11 +3,12 @@ import { Link, NavLink, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, Briefcase, PlusCircle, BookOpen,
-  Gavel, User, Menu, X, Wallet, ChevronDown, Zap
+  Gavel, User, Menu, X, Zap
 } from 'lucide-react'
 import ParleyLogo from '@components/ui/ParleyLogo'
 import ThemeToggle from '@components/ui/ThemeToggle'
 import useWalletStore from '@store/useWalletStore'
+import { AccountPanel } from '@components/wallet/AccountPanel'
 import { useSound } from '@hooks/useSound'
 
 const navLinks = [
@@ -22,9 +23,8 @@ const navLinks = [
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [walletDropdown, setWalletDropdown] = useState(false)
   const location = useLocation()
-  const { address, isConnected, isConnecting, connect, disconnect, shortAddress, balance } = useWalletStore()
+  const wallet = useWalletStore()
   const { play } = useSound()
 
   useEffect(() => {
@@ -123,114 +123,8 @@ export default function Navbar() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
           <ThemeToggle />
 
-          {/* Wallet Button */}
-          <div style={{ position: 'relative' }}>
-            <button
-              onClick={() => {
-                play('click')
-                if (!isConnected) connect()
-                else setWalletDropdown(v => !v)
-              }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '8px 16px',
-                borderRadius: 12,
-                border: '1px solid',
-                cursor: 'pointer',
-                fontSize: 13,
-                fontWeight: 600,
-                transition: 'all 0.3s ease',
-                ...(isConnected ? {
-                  background: 'var(--accent-cyan-dim)',
-                  borderColor: 'var(--accent-cyan)',
-                  color: 'var(--accent-cyan)',
-                } : {
-                  background: 'linear-gradient(135deg, var(--accent-cyan), var(--accent-purple))',
-                  borderColor: 'transparent',
-                  color: '#fff',
-                }),
-              }}
-            >
-              <Wallet size={14} />
-              {isConnecting ? (
-                <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span className="spinner-sm" />
-                  Connecting...
-                </span>
-              ) : isConnected ? (
-                <>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 400 }}>
-                    {shortAddress()}
-                  </span>
-                  <ChevronDown size={12} />
-                </>
-              ) : (
-                'Connect Wallet'
-              )}
-            </button>
-
-            {/* Wallet Dropdown */}
-            <AnimatePresence>
-              {walletDropdown && isConnected && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                  transition={{ duration: 0.15 }}
-                  style={{
-                    position: 'absolute',
-                    top: 'calc(100% + 8px)',
-                    right: 0,
-                    width: 240,
-                    background: 'var(--bg-secondary)',
-                    border: '1px solid var(--border-primary)',
-                    borderRadius: 14,
-                    padding: 16,
-                    boxShadow: 'var(--shadow-lg)',
-                    zIndex: 999,
-                  }}
-                  onMouseLeave={() => setWalletDropdown(false)}
-                >
-                  <div style={{ marginBottom: 12 }}>
-                    <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 4 }}>WALLET</div>
-                    <div style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--text-primary)', wordBreak: 'break-all' }}>
-                      {address}
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-                    <div>
-                      <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>BALANCE</div>
-                      <div style={{ color: 'var(--accent-cyan)', fontWeight: 700, fontSize: 18 }}>{balance} GEN</div>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>NETWORK</div>
-                      <div style={{ color: 'var(--accent-purple)', fontWeight: 600, fontSize: 13 }}>Studionet</div>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <Link
-                      to={`/profile/${address}`}
-                      style={{ flex: 1 }}
-                      onClick={() => setWalletDropdown(false)}
-                    >
-                      <button className="btn-secondary" style={{ width: '100%', justifyContent: 'center', padding: '8px', fontSize: 13 }}>
-                        Profile
-                      </button>
-                    </Link>
-                    <button
-                      className="btn-ghost"
-                      style={{ color: 'var(--state-disputed)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8, fontSize: 13 }}
-                      onClick={() => { disconnect(); setWalletDropdown(false) }}
-                    >
-                      Disconnect
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+          {/* Wallet: connect button / address chip + connect & account modal (from Veritas) */}
+          <AccountPanel wallet={wallet} />
 
           {/* Mobile menu toggle */}
           <button

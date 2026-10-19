@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, Check, Plus, Minus, Info, Zap, AlertCircle } fro
 import { Link, useNavigate } from 'react-router-dom'
 import useWalletStore from '@store/useWalletStore'
 import { ParleySpinner } from '@components/spinners/Spinners'
+import { openDeal } from '@data/parleyService'
 
 const STEPS = ['Basics', 'Criteria', 'Timeline', 'Payment', 'Review']
 
@@ -78,6 +79,7 @@ export default function CreateDeal() {
   const [step, setStep] = useState(0)
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [submitError, setSubmitError] = useState(null)
 
   const [form, setForm] = useState({
     title: '',
@@ -103,11 +105,33 @@ export default function CreateDeal() {
   }
 
   const handleSubmit = async () => {
+    if (!form.price || isNaN(Number(form.price)) || Number(form.price) <= 0) {
+      setSubmitError('Please enter a valid price in GEN (minimum 0.01 GEN)')
+      return
+    }
     setSubmitting(true)
-    await new Promise(r => setTimeout(r, 2500))
-    setSubmitting(false)
-    setSubmitted(true)
-    setTimeout(() => navigate('/deals'), 2000)
+    setSubmitError(null)
+    try {
+      await openDeal({
+        title: form.title || 'Untitled Deal',
+        scope: form.scope || '',
+        criteria: form.criteria.filter(Boolean),
+        provider: form.openToAny || !form.provider ? '0x0000000000000000000000000000000000000000' : form.provider,
+        offerFor: Math.round(Number(form.offerDays || 7) * 86400),
+        workFor: Math.round(Number(form.workDays || 30) * 86400),
+        reviewFor: Math.round(Number(form.reviewDays || 7) * 86400),
+        bondBps: Number(form.bondBps || 1000),
+        pinned: Boolean(form.pinned),
+        priceGen: String(form.price),
+      })
+      setSubmitted(true)
+      setTimeout(() => navigate('/deals'), 2000)
+    } catch (err) {
+      console.error('Failed to post deal on-chain:', err)
+      setSubmitError(err?.reason || err?.message || 'Transaction rejected or failed')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   if (!isConnected) {
@@ -379,6 +403,23 @@ export default function CreateDeal() {
                 }}>
                   ⚠️ Once posted, the price is locked until the deal ends. Review carefully before submitting.
                 </div>
+                {submitError && (
+                  <div style={{
+                    marginTop: 16,
+                    padding: '12px 16px',
+                    borderRadius: 12,
+                    background: 'rgba(239,68,68,0.12)',
+                    border: '1px solid rgba(239,68,68,0.4)',
+                    color: '#EF4444',
+                    fontSize: 13,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                  }}>
+                    <AlertCircle size={16} />
+                    <span>{submitError}</span>
+                  </div>
+                )}
               </div>
             )}
           </motion.div>

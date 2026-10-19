@@ -20,6 +20,14 @@ import {
   STUDIONET_NETWORK,
 } from './contract.js'
 
+export {
+  PARLEY_ADDRESS,
+  PARLEY_ABI,
+  STUDIONET_RPC,
+  STUDIONET_CHAIN_ID,
+  STUDIONET_NETWORK,
+} from './contract.js'
+
 // ─── Read-only provider (no wallet required) ─────────────────────────────────
 const readProvider = new ethers.JsonRpcProvider(STUDIONET_RPC)
 

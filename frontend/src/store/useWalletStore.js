@@ -3,8 +3,8 @@ import { ethers } from 'ethers'
 import {
   switchToStudionet,
   fetchBalance,
-  STUDIONET_CHAIN_ID,
 } from '@data/parleyService'
+import { STUDIONET_CHAIN_ID } from '@data/contract'
 
 /**
  * Wallet Store — real MetaMask connection to GenLayer Studionet.

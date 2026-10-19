@@ -1,0 +1,2146 @@
+{
+  "title": "Parley live test on Studionet",
+  "network": "studionet",
+  "rpc": "https://studio.genlayer.com/api",
+  "contract": "0x5d084E85056Acc332793f34667b8a9890f7B2Bd9",
+  "startedAt": "2026-10-18T14:58:23.686Z",
+  "finishedAt": "2026-10-18T15:36:12.403Z",
+  "finished": true,
+  "accounts": {
+    "client": "0x8334435387c50fE6B05D94bE599553b0F7b971F3",
+    "provider": "0x4474c891E0634D7D76372ffc296Afc16dDfaaC1A",
+    "outsider": "0xE1D0645Ee753FEDf1897b763105386cd93357EBD"
+  },
+  "inputs": {
+    "scenarios": [
+      "cancel",
+      "adversarial",
+      "approve",
+      "split",
+      "silent",
+      "default",
+      "court"
+    ],
+    "price": "100000000000000000",
+    "bond": "10000000000000000",
+    "workUrl": "https://www.iana.org/help/example-domains",
+    "criteria": "The page explains what example domains are|The page names who maintains them|The page mentions reserved domain names"
+  },
+  "statsBefore": {
+    "total": 9,
+    "settled": 3,
+    "cancelled": 5,
+    "defaulted": 0,
+    "rulings": 0,
+    "volume": "300000000000000000",
+    "deposited": "930000000000000000",
+    "paid": "720000000000000000"
+  },
+  "statsAfter": {
+    "total": 16,
+    "settled": 8,
+    "cancelled": 6,
+    "defaulted": 1,
+    "rulings": 1,
+    "volume": "800000000000000000",
+    "deposited": "1700000000000000000",
+    "paid": "1490000000000000000"
+  },
+  "scenarios": [
+    {
+      "name": "cancel",
+      "note": "an offer nobody takes is withdrawn and the price comes back",
+      "status": "passed",
+      "startedAt": "2026-10-18T14:58:25.471Z",
+      "endedAt": "2026-10-18T14:59:49.255Z",
+      "steps": [
+        {
+          "label": "open_deal",
+          "fn": "open_deal",
+          "caller": "client",
+          "value": "100000000000000000",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0x2c1301d759d61c6558060630ce4837a04490c2d108115ba3233d9b06a208cf3a",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "withdraw by a stranger",
+          "fn": "withdraw_offer",
+          "caller": "outsider",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x948d82afd34bf0bd7070a1764371b7df6e6fdb95ef4b00be3e6f90f74f4d0ee3",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "withdraw_offer",
+          "fn": "withdraw_offer",
+          "caller": "client",
+          "value": "0",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0xc4978996363dd98570b81c3270cf76bde1caa742befe27f59c505756d5d378b8",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "taking a cancelled deal",
+          "fn": "accept_deal",
+          "caller": "provider",
+          "value": "10000000000000000",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x7644607825488b2724d71456e67c8a697669c234adaaad7087a20b6007a1159a",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "claim",
+          "fn": "claim",
+          "caller": "client",
+          "value": "0",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0xce053289f337d6003e8d36caf0c6d8343e8f50123e3c7021b5b1a210008333bd",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "second claim by client",
+          "fn": "claim",
+          "caller": "client",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0xe0bcdffaea7ac8d83a197f339a2c52efb0ce9bb47fe073d5d47d03439a4c7622",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        }
+      ],
+      "checks": [
+        {
+          "name": "open_deal succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "the new deal is the newest one of the account",
+          "ok": true,
+          "detail": "id 9, deals before 9"
+        },
+        {
+          "name": "the deal is open and holds the price",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "withdraw by a stranger is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "withdraw by a stranger moved no money",
+          "ok": true,
+          "detail": "deposited 1030000000000000000"
+        },
+        {
+          "name": "withdraw_offer succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "the deal is cancelled",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "taking a cancelled deal is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "taking a cancelled deal moved no money",
+          "ok": true,
+          "detail": "deposited 1030000000000000000"
+        },
+        {
+          "name": "owed_of client",
+          "ok": true,
+          "detail": "0.1 GEN, expected 0.1 GEN"
+        },
+        {
+          "name": "claim succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "client is marked as paid",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "second claim by client is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "second claim by client moved no money",
+          "ok": true,
+          "detail": "deposited 1030000000000000000"
+        },
+        {
+          "name": "owed_of provider",
+          "ok": true,
+          "detail": "0 GEN, expected 0 GEN"
+        }
+      ]
+    },
+    {
+      "name": "adversarial",
+      "note": "calls that must be refused, with the contract's money checked after each one",
+      "status": "passed",
+      "startedAt": "2026-10-18T14:59:49.255Z",
+      "endedAt": "2026-10-18T15:06:22.921Z",
+      "steps": [
+        {
+          "label": "a price below the minimum",
+          "fn": "open_deal",
+          "caller": "client",
+          "value": "1000000000000000",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0xdc919d8a7e238ed29c0bb6781d0ae9fe9f25e0a86c9162620fda1f06f952d747",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "a too short title",
+          "fn": "open_deal",
+          "caller": "client",
+          "value": "100000000000000000",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x444eaa2534d3410f6e53de2a299b640fddfc97660d964aedda78fdd37ed0f98d",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "no criteria",
+          "fn": "open_deal",
+          "caller": "client",
+          "value": "100000000000000000",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x5ed8420fe59ded5b1c8eea356a39b7ef8c9f2a8d261cc0efdcf5ef405a501975",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "seven criteria",
+          "fn": "open_deal",
+          "caller": "client",
+          "value": "100000000000000000",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0xbc197bd7346cba8c5c317112522ba941bd23ad5e679de21883026d29255d6ea4",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "a broken provider address",
+          "fn": "open_deal",
+          "caller": "client",
+          "value": "100000000000000000",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x30d35525f861490d64938b9886f705c5d801a58312e37616353a00892e40be34",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "the zero address as provider",
+          "fn": "open_deal",
+          "caller": "client",
+          "value": "100000000000000000",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x277114a4d9892e13c0b2eb7af86b3217d6a097bd3a87b3c8379158423a9a970d",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "the client as provider",
+          "fn": "open_deal",
+          "caller": "client",
+          "value": "100000000000000000",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x0ea8d68851cf762b46c249552781573176102932098fafa9908849b7a9d1ca4a",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "a bond above 30%",
+          "fn": "open_deal",
+          "caller": "client",
+          "value": "100000000000000000",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x759d2d8a1d7c7be8ce78290162ea85184cec3690f2d41cd28ca9949683734171",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "an offer time below 5 minutes",
+          "fn": "open_deal",
+          "caller": "client",
+          "value": "100000000000000000",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x49d1330d4fb2789750139fc49607e483ba2a4435b7c440a856aa9fa0d870d495",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "open_deal reserved for the provider",
+          "fn": "open_deal",
+          "caller": "client",
+          "value": "100000000000000000",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0xd93a2b8290f0580468e1b89163ad5d660867e076053bd50c8122012973441dc6",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "a stranger takes a reserved deal",
+          "fn": "accept_deal",
+          "caller": "outsider",
+          "value": "10000000000000000",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x790e3dc880ca573be3a99401bc7908716772c096a5a34d1a768db93b276f7033",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "the client takes their own deal",
+          "fn": "accept_deal",
+          "caller": "client",
+          "value": "10000000000000000",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0xc3746f488184b4b7fff9c6997eaf9c509927c602f5101ddbcc42daee24f227e6",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "taking with a wrong bond",
+          "fn": "accept_deal",
+          "caller": "provider",
+          "value": "10000000000000001",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x0121ee203254f64cc7536a8948d9c119a2303becfc10cb61150d4e411bc99b65",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "delivering before taking the deal",
+          "fn": "deliver",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0xd69bcd0cbbd04db9e2e7ccbc2cf576e97f6c3369ea22040595cc11035f82951e",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "approving an open deal",
+          "fn": "approve",
+          "caller": "client",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x2a8e3fa31400f8fc8fd7dfbf6129e48cd8d9ed43d307d98cd04a053b81701303",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "claiming an open deal",
+          "fn": "claim",
+          "caller": "outsider",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0xdc345de543335db8678c6ee42a59a06299fa5b2a82f7e2275c9782c90b1d36dc",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "accept_deal",
+          "fn": "accept_deal",
+          "caller": "provider",
+          "value": "10000000000000000",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0x4be8e566d2ab079f8d6a0d9793fdbbee2ebb5d825b859959656543acad72b584",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "the client delivers",
+          "fn": "deliver",
+          "caller": "client",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0xe930c524f6c6922d9b0a8c129fc74e46609ef608c3d5de27debcbc77638c446d",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "a private address as deliverable",
+          "fn": "deliver",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x31c001462dc762d94c52223e13793a0edb9d2172bcf9a982694392479a1526d6",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "a link with credentials",
+          "fn": "deliver",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0xef9d41f94a20bd87eb32d4030cee0d4366d6e0a64c20b7418e6696f23de84073",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "a non-http link",
+          "fn": "deliver",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x0cb9890ee81ee83880c7e0f306b79c40be8085a8a2b8f806680f0cffcb0dbf1f",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "an extension below 5 minutes",
+          "fn": "request_extension",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x74933a75e3272a6a170254171d0c3f3e70ced3083592e4554178f74e4328383f",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "the client asks for an extension",
+          "fn": "request_extension",
+          "caller": "client",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x18b0522fd0f1d7de52319ef3cc7d7bd09fb15fe64c76b8ffbc54f6c508cc7b08",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "answering a missing extension request",
+          "fn": "answer_extension",
+          "caller": "client",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x4ae7ff8101e1b8fb12bba54c3cd35bc9051acc76d782616568b3cc07ef1cfde7",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "approving before delivery",
+          "fn": "approve",
+          "caller": "client",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0xe344c3e5f1034498b462fbe92be3a90457aefe9fe9b7923100457104dccb66ce",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "expiring a deal that is on time",
+          "fn": "expire",
+          "caller": "outsider",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0xcea3705033a2d361e1c23a77377b1a3b8523f4b3aa995c61d1e2af026fadbae2",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "deliver",
+          "fn": "deliver",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0xceb8ad865013b2bc84cf611325b7daab1582485bcf10f20075f560e4c700b82b",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "the provider rejects",
+          "fn": "reject",
+          "caller": "provider",
+          "value": "5000000000000000",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x7d05e4a15f20ceb03436c549ca6f0ccba9d7fc424931d13f8e54834165271e3a",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "a stranger rejects",
+          "fn": "reject",
+          "caller": "outsider",
+          "value": "5000000000000000",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x7b58106af6cb341d47b63ec09356394371a2f5fea3bf5d7e554feec8b0958ace",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "rejecting with a short deposit",
+          "fn": "reject",
+          "caller": "client",
+          "value": "4999999999999999",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0xc0b1074f1f07d72963723f762fcc79c7df04333881f91865c738fe4420e015fd",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "a one-word reason",
+          "fn": "reject",
+          "caller": "client",
+          "value": "5000000000000000",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0xcbface418a6ac49d48ac75f2d7c069db2b65458f3d3c604d4bbf8eadc17db488",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "a stranger approves",
+          "fn": "approve",
+          "caller": "outsider",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0xc435fb0817e95de40a07eb65e82350f4acc0070cc9dde6cad1ef22be4fd21f87",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "finalizing inside the review window",
+          "fn": "finalize",
+          "caller": "outsider",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x556dda27febf118afa55d206579944003b76b1d335a2234ff485a3d230bbc0bf",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "asking for a ruling without a dispute",
+          "fn": "rule",
+          "caller": "outsider",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0xcce6c23e4e457967e4177b44160a7a6065a6124090189cbd3c3cf753771a89b0",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "an offer without a dispute",
+          "fn": "propose_split",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0xf9973eac8a73442cf10aee3c44f7b75aa83be159c85d761467e67d8889ad99c7",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "an appeal without a ruling",
+          "fn": "appeal",
+          "caller": "client",
+          "value": "10000000000000000",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x2cbe37761f49a6c63572b9d61822c1d5ffb9a04f18f7475d23f47789d07e684c",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "releasing a healthy deal",
+          "fn": "release",
+          "caller": "outsider",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0xb17dd8440f9c10890dfee12d9d3aa01d43335269e5811ffaf18fa0bd19987271",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "approve",
+          "fn": "approve",
+          "caller": "client",
+          "value": "0",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0x4577c943bf573da828fd12707f38af6c5adc73ab35a7742e18f0d3d594dd7d88",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "approving twice",
+          "fn": "approve",
+          "caller": "client",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x26bcc17ed77c41df047a43dcf720a077b8c443cef9f5f355a634c719d39b62e4",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "a stranger claims",
+          "fn": "claim",
+          "caller": "outsider",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x9ee1868786b2434338e92bad712b654dcbb828a02fbbe8890466d16cbb6f95ab",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "claim",
+          "fn": "claim",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0xcf9b601054d8bb236321e9e43a3911e34634077be7466c70db02bfbe81728e17",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "second claim by provider",
+          "fn": "claim",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x3668dd067953676293b51dce43a7d70b96dd4ce1a656ee427eeb516ff2e2f06a",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        }
+      ],
+      "checks": [
+        {
+          "name": "a price below the minimum is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "a price below the minimum moved no money",
+          "ok": true,
+          "detail": "deposited 1030000000000000000"
+        },
+        {
+          "name": "a too short title is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "a too short title moved no money",
+          "ok": true,
+          "detail": "deposited 1030000000000000000"
+        },
+        {
+          "name": "no criteria is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "no criteria moved no money",
+          "ok": true,
+          "detail": "deposited 1030000000000000000"
+        },
+        {
+          "name": "seven criteria is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "seven criteria moved no money",
+          "ok": true,
+          "detail": "deposited 1030000000000000000"
+        },
+        {
+          "name": "a broken provider address is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "a broken provider address moved no money",
+          "ok": true,
+          "detail": "deposited 1030000000000000000"
+        },
+        {
+          "name": "the zero address as provider is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "the zero address as provider moved no money",
+          "ok": true,
+          "detail": "deposited 1030000000000000000"
+        },
+        {
+          "name": "the client as provider is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "the client as provider moved no money",
+          "ok": true,
+          "detail": "deposited 1030000000000000000"
+        },
+        {
+          "name": "a bond above 30% is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "a bond above 30% moved no money",
+          "ok": true,
+          "detail": "deposited 1030000000000000000"
+        },
+        {
+          "name": "an offer time below 5 minutes is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "an offer time below 5 minutes moved no money",
+          "ok": true,
+          "detail": "deposited 1030000000000000000"
+        },
+        {
+          "name": "open_deal reserved for the provider succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "the new deal is the newest one of the account",
+          "ok": true,
+          "detail": "id 10, deals before 10"
+        },
+        {
+          "name": "a stranger takes a reserved deal is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "a stranger takes a reserved deal moved no money",
+          "ok": true,
+          "detail": "deposited 1130000000000000000"
+        },
+        {
+          "name": "the client takes their own deal is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "the client takes their own deal moved no money",
+          "ok": true,
+          "detail": "deposited 1130000000000000000"
+        },
+        {
+          "name": "taking with a wrong bond is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "taking with a wrong bond moved no money",
+          "ok": true,
+          "detail": "deposited 1130000000000000000"
+        },
+        {
+          "name": "delivering before taking the deal is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "delivering before taking the deal moved no money",
+          "ok": true,
+          "detail": "deposited 1130000000000000000"
+        },
+        {
+          "name": "approving an open deal is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "approving an open deal moved no money",
+          "ok": true,
+          "detail": "deposited 1130000000000000000"
+        },
+        {
+          "name": "claiming an open deal is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "claiming an open deal moved no money",
+          "ok": true,
+          "detail": "deposited 1130000000000000000"
+        },
+        {
+          "name": "accept_deal succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "the client delivers is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "the client delivers moved no money",
+          "ok": true,
+          "detail": "deposited 1140000000000000000"
+        },
+        {
+          "name": "a private address as deliverable is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "a private address as deliverable moved no money",
+          "ok": true,
+          "detail": "deposited 1140000000000000000"
+        },
+        {
+          "name": "a link with credentials is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "a link with credentials moved no money",
+          "ok": true,
+          "detail": "deposited 1140000000000000000"
+        },
+        {
+          "name": "a non-http link is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "a non-http link moved no money",
+          "ok": true,
+          "detail": "deposited 1140000000000000000"
+        },
+        {
+          "name": "an extension below 5 minutes is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "an extension below 5 minutes moved no money",
+          "ok": true,
+          "detail": "deposited 1140000000000000000"
+        },
+        {
+          "name": "the client asks for an extension is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "the client asks for an extension moved no money",
+          "ok": true,
+          "detail": "deposited 1140000000000000000"
+        },
+        {
+          "name": "answering a missing extension request is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "answering a missing extension request moved no money",
+          "ok": true,
+          "detail": "deposited 1140000000000000000"
+        },
+        {
+          "name": "approving before delivery is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "approving before delivery moved no money",
+          "ok": true,
+          "detail": "deposited 1140000000000000000"
+        },
+        {
+          "name": "expiring a deal that is on time is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "expiring a deal that is on time moved no money",
+          "ok": true,
+          "detail": "deposited 1140000000000000000"
+        },
+        {
+          "name": "deliver succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "the provider rejects is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "the provider rejects moved no money",
+          "ok": true,
+          "detail": "deposited 1140000000000000000"
+        },
+        {
+          "name": "a stranger rejects is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "a stranger rejects moved no money",
+          "ok": true,
+          "detail": "deposited 1140000000000000000"
+        },
+        {
+          "name": "rejecting with a short deposit is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "rejecting with a short deposit moved no money",
+          "ok": true,
+          "detail": "deposited 1140000000000000000"
+        },
+        {
+          "name": "a one-word reason is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "a one-word reason moved no money",
+          "ok": true,
+          "detail": "deposited 1140000000000000000"
+        },
+        {
+          "name": "a stranger approves is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "a stranger approves moved no money",
+          "ok": true,
+          "detail": "deposited 1140000000000000000"
+        },
+        {
+          "name": "finalizing inside the review window is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "finalizing inside the review window moved no money",
+          "ok": true,
+          "detail": "deposited 1140000000000000000"
+        },
+        {
+          "name": "asking for a ruling without a dispute is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "asking for a ruling without a dispute moved no money",
+          "ok": true,
+          "detail": "deposited 1140000000000000000"
+        },
+        {
+          "name": "an offer without a dispute is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "an offer without a dispute moved no money",
+          "ok": true,
+          "detail": "deposited 1140000000000000000"
+        },
+        {
+          "name": "an appeal without a ruling is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "an appeal without a ruling moved no money",
+          "ok": true,
+          "detail": "deposited 1140000000000000000"
+        },
+        {
+          "name": "releasing a healthy deal is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "releasing a healthy deal moved no money",
+          "ok": true,
+          "detail": "deposited 1140000000000000000"
+        },
+        {
+          "name": "approve succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "approving twice is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "approving twice moved no money",
+          "ok": true,
+          "detail": "deposited 1140000000000000000"
+        },
+        {
+          "name": "a stranger claims is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "a stranger claims moved no money",
+          "ok": true,
+          "detail": "deposited 1140000000000000000"
+        },
+        {
+          "name": "owed_of client",
+          "ok": true,
+          "detail": "0 GEN, expected 0 GEN"
+        },
+        {
+          "name": "owed_of provider",
+          "ok": true,
+          "detail": "0.11 GEN, expected 0.11 GEN"
+        },
+        {
+          "name": "claim succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "provider is marked as paid",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "second claim by provider is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "second claim by provider moved no money",
+          "ok": true,
+          "detail": "deposited 1140000000000000000"
+        },
+        {
+          "name": "reading a deal that does not exist fails",
+          "ok": true,
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "name": "approve",
+      "note": "the plain path: take, deliver, approve, claim",
+      "status": "passed",
+      "startedAt": "2026-10-18T15:06:22.921Z",
+      "endedAt": "2026-10-18T15:07:48.080Z",
+      "steps": [
+        {
+          "label": "open_deal",
+          "fn": "open_deal",
+          "caller": "client",
+          "value": "100000000000000000",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0x9fd3d6c3e42f2057f60204f6a2aaa56e9fd17b62073c8b2a145a5232a6b33ed7",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "accept_deal",
+          "fn": "accept_deal",
+          "caller": "provider",
+          "value": "10000000000000000",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0x2ddaa6fea32da0c32ef195b2eec1d3b340d56611956129b37d3b88ec4243ced6",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "deliver",
+          "fn": "deliver",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0xbe5eacf9f41e951514a31e93f985ec37bab7d72ad8de4f53011d1f42ff4c3606",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "approve",
+          "fn": "approve",
+          "caller": "client",
+          "value": "0",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0xa2abb668be9d4e36dfaf884eda12a7b3013dfb44321625c408196e65dd3a5a65",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "claim",
+          "fn": "claim",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0x379b6ccf76d56b76682382bfe0ae57edbd9fd8770c429ef54fa07b1153a174be",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "second claim by provider",
+          "fn": "claim",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x6cbe25a761063d78353bf7cd276e92b9b03153fe1d27707c9f15086dc7f51be7",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        }
+      ],
+      "checks": [
+        {
+          "name": "open_deal succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "the new deal is the newest one of the account",
+          "ok": true,
+          "detail": "id 11, deals before 11"
+        },
+        {
+          "name": "accept_deal succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "deliver succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "approve succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "the deal is settled by approval",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "owed_of client",
+          "ok": true,
+          "detail": "0 GEN, expected 0 GEN"
+        },
+        {
+          "name": "owed_of provider",
+          "ok": true,
+          "detail": "0.11 GEN, expected 0.11 GEN"
+        },
+        {
+          "name": "claim succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "provider is marked as paid",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "second claim by provider is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "second claim by provider moved no money",
+          "ok": true,
+          "detail": "deposited 1250000000000000000"
+        },
+        {
+          "name": "the provider's record shows a delivered job",
+          "ok": true,
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "name": "split",
+      "note": "the client rejects, both sides agree on a split and skip the court",
+      "status": "passed",
+      "startedAt": "2026-10-18T15:07:48.082Z",
+      "endedAt": "2026-10-18T15:10:40.915Z",
+      "steps": [
+        {
+          "label": "open_deal",
+          "fn": "open_deal",
+          "caller": "client",
+          "value": "100000000000000000",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0x21f6c9d3cd83b3ddefab62d71dfe0e45be855e7bacbf547fdb220494cb4c7278",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "accept_deal",
+          "fn": "accept_deal",
+          "caller": "provider",
+          "value": "10000000000000000",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0x63f1ef0b5cfd64d689332aa7c78aafcddf66eb0b7eab850745e3c7f2c54295cd",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "deliver",
+          "fn": "deliver",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0xdb85963a9c470493e2c30e7723dc72a14c95045c9d86470a8953df6e15c4d7a0",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "reject",
+          "fn": "reject",
+          "caller": "client",
+          "value": "5000000000000000",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0xe2adf250bb222249afa1b4b62fc87d5ffb3d699619b643a3b019f158e82f57c3",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "client offers 20%",
+          "fn": "propose_split",
+          "caller": "client",
+          "value": "0",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0xd0947628350c4e597088a2b99d07e7c32e1fb05128919f3e90dba16212c8b1fd",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "provider offers 70%",
+          "fn": "propose_split",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0x56f0b7875664a5e24a6010ab9c472066a9dffd4d58d7483a6222f030a42b54ce",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "accepting your own offer",
+          "fn": "accept_split",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x2cadcd5afca10c49666e3df4d8011b0d93d02a636f9c1d1ecabbcdf224a21646",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "accepting a share that was not offered",
+          "fn": "accept_split",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0xb0ff3f41d1418996404024a7fdbb7989e328b61887a1abb5d76b85b473b3212c",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "provider accepts the client's 20%",
+          "fn": "accept_split",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0x4e28ce708cb4d3704558f7bf0f69c102f131989c9081488d12af5f5cb4cd0f72",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "claim",
+          "fn": "claim",
+          "caller": "client",
+          "value": "0",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0xc07296622dafbe960aabdbafdf4e7c67ecc636ceb0a019b5bb7b4304ed03bcd2",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "second claim by client",
+          "fn": "claim",
+          "caller": "client",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0xf29f0c735b6ff10f147a86b4bd1157da8a6ec79133f3265fb6862c07987bf9f8",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "claim",
+          "fn": "claim",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0x4e1b4ca44d5cd17cfa610477bd6ee59ad95305327f49503e07115e15f42bcee9",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "second claim by provider",
+          "fn": "claim",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x53500387451aa9cc1fcc7099b4e26e7a2de9e936e8cbc5c1a3df13f0113a3bf5",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        }
+      ],
+      "checks": [
+        {
+          "name": "open_deal succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "the new deal is the newest one of the account",
+          "ok": true,
+          "detail": "id 12, deals before 12"
+        },
+        {
+          "name": "accept_deal succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "deliver succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "reject succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "client offers 20% succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "provider offers 70% succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "accepting your own offer is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "accepting your own offer moved no money",
+          "ok": true,
+          "detail": "deposited 1365000000000000000"
+        },
+        {
+          "name": "accepting a share that was not offered is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "accepting a share that was not offered moved no money",
+          "ok": true,
+          "detail": "deposited 1365000000000000000"
+        },
+        {
+          "name": "provider accepts the client's 20% succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "settled by agreement at 20%",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "owed_of client",
+          "ok": true,
+          "detail": "0.085 GEN, expected 0.085 GEN"
+        },
+        {
+          "name": "claim succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "client is marked as paid",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "second claim by client is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "second claim by client moved no money",
+          "ok": true,
+          "detail": "deposited 1365000000000000000"
+        },
+        {
+          "name": "owed_of provider",
+          "ok": true,
+          "detail": "0.03 GEN, expected 0.03 GEN"
+        },
+        {
+          "name": "claim succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "provider is marked as paid",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "second claim by provider is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "second claim by provider moved no money",
+          "ok": true,
+          "detail": "deposited 1365000000000000000"
+        }
+      ]
+    },
+    {
+      "name": "silent",
+      "note": "the client says nothing, so the delivery counts as approved",
+      "status": "passed",
+      "startedAt": "2026-10-18T15:10:40.916Z",
+      "endedAt": "2026-10-18T15:17:06.096Z",
+      "steps": [
+        {
+          "label": "open_deal",
+          "fn": "open_deal",
+          "caller": "client",
+          "value": "100000000000000000",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0x497f07d00924474162e04c3be2cf5106044682d0de53c5204ca486e8a1cac4f8",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "accept_deal",
+          "fn": "accept_deal",
+          "caller": "provider",
+          "value": "10000000000000000",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0x49d7ebb33b9e67b6950d1107e649c1a84cbdc52a11882a3b718de2aa9d875358",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "deliver",
+          "fn": "deliver",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0x97bb02e0b973ad96c9f37c991b1005a2415069590ca92350a4557a7cd33afc4f",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "finalizing too early",
+          "fn": "finalize",
+          "caller": "outsider",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0xa9588915714da9e0d2d3c626be92a09886a37495e3ad9b5ae843c5b6d58da92b",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "finalize",
+          "fn": "finalize",
+          "caller": "outsider",
+          "value": "0",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0x542164bede339f13544d954dd3b913405be6bc32fe1c902f182a77286d42da0f",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "claim",
+          "fn": "claim",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0x25c260d8397474f2b57251e7099638caaf58c3b41a218392b1fcf612a7b64080",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "second claim by provider",
+          "fn": "claim",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x49e5082b678b5227bf3cfa9558bb9519fb7a0115e3174d41aecfb717dc14874b",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        }
+      ],
+      "checks": [
+        {
+          "name": "open_deal succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "the new deal is the newest one of the account",
+          "ok": true,
+          "detail": "id 13, deals before 13"
+        },
+        {
+          "name": "accept_deal succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "deliver succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "finalizing too early is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "finalizing too early moved no money",
+          "ok": true,
+          "detail": "deposited 1475000000000000000"
+        },
+        {
+          "name": "finalize succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "settled by silence",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "owed_of client",
+          "ok": true,
+          "detail": "0 GEN, expected 0 GEN"
+        },
+        {
+          "name": "owed_of provider",
+          "ok": true,
+          "detail": "0.11 GEN, expected 0.11 GEN"
+        },
+        {
+          "name": "claim succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "provider is marked as paid",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "second claim by provider is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "second claim by provider moved no money",
+          "ok": true,
+          "detail": "deposited 1475000000000000000"
+        }
+      ]
+    },
+    {
+      "name": "default",
+      "note": "the provider never delivers and loses the bond",
+      "status": "passed",
+      "startedAt": "2026-10-18T15:17:06.097Z",
+      "endedAt": "2026-10-18T15:23:31.772Z",
+      "steps": [
+        {
+          "label": "open_deal",
+          "fn": "open_deal",
+          "caller": "client",
+          "value": "100000000000000000",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0xbc74e8d8351650321dc968b2f9526d4bf9195b6df0783435c21d0b4ccafd64a7",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "accept_deal",
+          "fn": "accept_deal",
+          "caller": "provider",
+          "value": "10000000000000000",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0x7b21d46ec2bccfb88fcc23a3596ca94cf300bc554413aa717770e923f7abeb29",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "expiring before the due date",
+          "fn": "expire",
+          "caller": "outsider",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x1eb3ab5815f271517621e0116c3faaee162f881bd506cebe5c807cd52d65f24e",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "delivering late",
+          "fn": "deliver",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x50bfee4c9e923807b32f2e3a6a5d5dc24843b7389a3140997dca702c702eef6b",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "expire",
+          "fn": "expire",
+          "caller": "outsider",
+          "value": "0",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0xd52f04dcb280faf797a75f9e66ce596c9dbcd1820c227867358d98e9d065c4e7",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "claim",
+          "fn": "claim",
+          "caller": "client",
+          "value": "0",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0xdc1d21e5dae1a171a78dc9acfe1dca1b375d9b1a718245fcecb340ac33711fd1",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "second claim by client",
+          "fn": "claim",
+          "caller": "client",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x2d512ed4c4c8ac4be78f1261b4c9ad9c71dab4815519316c6b681099b78dc6c0",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        }
+      ],
+      "checks": [
+        {
+          "name": "open_deal succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "the new deal is the newest one of the account",
+          "ok": true,
+          "detail": "id 14, deals before 14"
+        },
+        {
+          "name": "accept_deal succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "expiring before the due date is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "expiring before the due date moved no money",
+          "ok": true,
+          "detail": "deposited 1585000000000000000"
+        },
+        {
+          "name": "delivering late is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "delivering late moved no money",
+          "ok": true,
+          "detail": "deposited 1585000000000000000"
+        },
+        {
+          "name": "expire succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "the deal is defaulted",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "owed_of client",
+          "ok": true,
+          "detail": "0.11 GEN, expected 0.11 GEN"
+        },
+        {
+          "name": "claim succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "client is marked as paid",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "second claim by client is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "second claim by client moved no money",
+          "ok": true,
+          "detail": "deposited 1585000000000000000"
+        },
+        {
+          "name": "owed_of provider",
+          "ok": true,
+          "detail": "0 GEN, expected 0 GEN"
+        },
+        {
+          "name": "the default is on the provider's record",
+          "ok": true,
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "name": "court",
+      "note": "a real hearing: reject, reply, ruling, finalize and payout",
+      "status": "passed",
+      "startedAt": "2026-10-18T15:23:31.774Z",
+      "endedAt": "2026-10-18T15:36:10.918Z",
+      "steps": [
+        {
+          "label": "open_deal",
+          "fn": "open_deal",
+          "caller": "client",
+          "value": "100000000000000000",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0x291f34a3c5f63e0e25108edca8517ee78e04aee5ccfe581b96bcf9bcfe86ac21",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "accept_deal",
+          "fn": "accept_deal",
+          "caller": "provider",
+          "value": "10000000000000000",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0x10af33fb0583705e9efcdc3f159bf8886a326771a280fc4740d4d223dbbff8ec",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "deliver",
+          "fn": "deliver",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0x178f6486c4ef9636b2471168845a7dbf852fde1bd7e039588f6a8fdee203a7d6",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "reject",
+          "fn": "reject",
+          "caller": "client",
+          "value": "5000000000000000",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0xb02aede9435f39aa8a58e31597a083d51337a3a45fa3cc27ce6fe8d67bc87709",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "a ruling before the provider replied",
+          "fn": "rule",
+          "caller": "outsider",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0xa7b8e694b0e20123575d876f0151fea13ae86ea8d5169475d0cb10585519bd63",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "reply",
+          "fn": "reply",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0x5bdfd42a9462d03b4cfb1886cfca44f1f9d878101d93b1b98d6b8616879bd05e",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "rule",
+          "fn": "rule",
+          "caller": "outsider",
+          "value": "0",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0xfab3a8244c43b09c0986a86ca86f10ee2c76b936f71b2ed6749dd4ea5672a51b",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "finalizing inside the appeal window",
+          "fn": "finalize",
+          "caller": "outsider",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x9484d8ece77b4bce11506cdacf957631dd4bc15748b6118c71e6db9e7769a84f",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "finalize",
+          "fn": "finalize",
+          "caller": "outsider",
+          "value": "0",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0xedb940bb419e83c2c95b6827d3d3178e44d04112845069fecd4189265f3eb7b0",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "claim",
+          "fn": "claim",
+          "caller": "client",
+          "value": "0",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0x05a2a0b6823016ff3fbb2a1dbdd2f4e5a9e8720013de41d0ded3271a3a3c95ed",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "second claim by client",
+          "fn": "claim",
+          "caller": "client",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0x78c885a4a969ce826c424da3a05168e982b7ab6ade676dff2730327dbe56dce4",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        },
+        {
+          "label": "claim",
+          "fn": "claim",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": false,
+          "attempt": 1,
+          "hash": "0x917cba69d06eeee5b076f4bf93d2e125a20fe7522fa3bec66af4478234433044",
+          "ok": true,
+          "status": "ACCEPTED / SUCCESS"
+        },
+        {
+          "label": "second claim by provider",
+          "fn": "claim",
+          "caller": "provider",
+          "value": "0",
+          "expectedFail": true,
+          "attempt": 1,
+          "hash": "0xed295160bb1075bd69859b150b6daf9a2f0be92870dc7c109440735462063292",
+          "ok": false,
+          "status": "ACCEPTED / ERROR"
+        }
+      ],
+      "checks": [
+        {
+          "name": "open_deal succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "the new deal is the newest one of the account",
+          "ok": true,
+          "detail": "id 15, deals before 15"
+        },
+        {
+          "name": "accept_deal succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "deliver succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "reject succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "a ruling before the provider replied is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "a ruling before the provider replied moved no money",
+          "ok": true,
+          "detail": "deposited 1700000000000000000"
+        },
+        {
+          "name": "reply succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "the court produced a transaction that was accepted",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "the ruling has one credit per criterion",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "every credited criterion carries a quote and a source",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "the completion matches the credits",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "the page hash is recorded",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "finalizing inside the appeal window is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "finalizing inside the appeal window moved no money",
+          "ok": true,
+          "detail": "deposited 1700000000000000000"
+        },
+        {
+          "name": "finalize succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "the ruling stands",
+          "ok": true,
+          "detail": "completion 8333"
+        },
+        {
+          "name": "the two shares add up to everything that was put in",
+          "ok": true,
+          "detail": "0.115 GEN of 0.115 GEN"
+        },
+        {
+          "name": "owed_of client",
+          "ok": true,
+          "detail": "0.01667 GEN"
+        },
+        {
+          "name": "claim succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "client is marked as paid",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "second claim by client is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "second claim by client moved no money",
+          "ok": true,
+          "detail": "deposited 1700000000000000000"
+        },
+        {
+          "name": "owed_of provider",
+          "ok": true,
+          "detail": "0.09833 GEN"
+        },
+        {
+          "name": "claim succeeds",
+          "ok": true,
+          "detail": "ACCEPTED / SUCCESS"
+        },
+        {
+          "name": "provider is marked as paid",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "second claim by provider is refused by the contract",
+          "ok": true,
+          "detail": "ACCEPTED / ERROR"
+        },
+        {
+          "name": "second claim by provider moved no money",
+          "ok": true,
+          "detail": "deposited 1700000000000000000"
+        }
+      ]
+    },
+    {
+      "name": "totals",
+      "note": "the contract's own books after the run",
+      "status": "passed",
+      "steps": [],
+      "checks": [
+        {
+          "name": "everything deposited during the run was paid out by claims",
+          "ok": true,
+          "detail": "deposited 0.77 GEN, paid 0.77 GEN"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "checks": 194,
+    "passed": 194,
+    "failed": 0,
+    "transactions": 94
+  }
+}

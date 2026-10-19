@@ -1,0 +1,16 @@
+{
+  "name": "parley-tools",
+  "private": true,
+  "type": "module",
+  "description": "Deploy and live-test the Parley contract on Studionet",
+  "scripts": {
+    "deploy": "node scripts/deploy.mjs",
+    "e2e": "node scripts/e2e.mjs",
+    "e2e:quick": "node scripts/e2e.mjs --only cancel,adversarial",
+    "e2e:plan": "node scripts/e2e.mjs --dry-run",
+    "check": "bash scripts/run-all.sh"
+  },
+  "dependencies": {
+    "genlayer-js": "1.1.8"
+  }
+}
